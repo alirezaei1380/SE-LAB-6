@@ -28,6 +28,10 @@ public class Memory {
         lastTempIndex += tempSize;
     }
 
+    private void addCodeBlock() {
+        codeBlock.add(new _3AddressCode());
+    }
+
     public int getTemp() {
         increaseTempAddress();
         return lastTempIndex - tempSize;
@@ -39,7 +43,7 @@ public class Memory {
     }
 
     public int saveMemory() {
-        codeBlock.add(new _3AddressCode());
+        addCodeBlock();
         return codeBlock.size() - 1;
     }
 
