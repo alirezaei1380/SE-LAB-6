@@ -4,7 +4,7 @@ import Log.Log;
 import errorHandler.ErrorHandler;
 import scanner.token.Token;
 import semantic.symbol.Symbol;
-import semantic.symbol.SymbolTable;
+import semantic.symbol.SymbolTableFacade;
 import semantic.symbol.SymbolType;
 
 import java.util.Stack;
@@ -17,11 +17,30 @@ public class CodeGenerator {
     private Stack<Address> ss = new Stack<Address>();
     private Stack<String> symbolStack = new Stack<>();
     private Stack<String> callStack = new Stack<>();
-    private SymbolTable symbolTable;
+    private SymbolTableFacade symbolTable;
 
     public CodeGenerator() {
-        symbolTable = new SymbolTable(memory);
+        symbolTable = new SymbolTableFacade(memory);
         //TODO
+    }
+
+    private Address[] fetchAddress(varType var, Boolean returnTemp){
+        Address temp = new Address(memory.getTempIndex(), var);
+        memory.increaseTempAddress();
+        Address s2 = ss.pop();
+        Address s1 = ss.pop();
+        Address[] addresses = new Address[]{s2, s1, null};
+        if(returnTemp)
+            addresses[2] = temp;
+        return addresses;
+    }
+
+    private Boolean checkVar(Address s1, Address s2, varType var){
+        if(s2 == null)
+            return s1.getVarType() == var;
+        if(var == null)
+            return s1.getVarType() == s2.getVarType();
+        return s1.getVarType() == var || s2.getVarType() == var;
     }
 
     public void printMemory() {
@@ -286,54 +305,47 @@ public class CodeGenerator {
     }
 
     public void assign() {
-        Address s1 = ss.pop();
-        Address s2 = ss.pop();
+        Address[] addresses = fetchAddress(null, false);
 //        try {
-        if (s1.getVarType() != s2.getVarType()) {
+        if (!checkVar(addresses[0], addresses[1], null)) {
             ErrorHandler.printError("The type of operands in assign is different ");
         }
 //        }catch (NullPointerException d)
 //        {
 //            d.printStackTrace();
 //        }
-        memory.add3AddressCode(Operation.ASSIGN, s1, s2, null);
+        memory.add3AddressCode(Operation.ASSIGN, addresses[0], addresses[1], null);
     }
 
     public void add() {
-        Address temp = new Address(memory.getTempIndex(), varType.Int);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
+        Address[] addresses = fetchAddress(varType.Int, true);
 
-        if (s1.getVarType() != varType.Int || s2.getVarType() != varType.Int) {
+        if (!checkVar(addresses[0], addresses[1], varType.Int)) {
             ErrorHandler.printError("In add two operands must be integer");
         }
-        memory.add3AddressCode(Operation.ADD, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.ADD, addresses[0], addresses[1], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void sub() {
-        Address temp = new Address(memory.getTempIndex(), varType.Int);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != varType.Int || s2.getVarType() != varType.Int) {
+        Address[] addresses = fetchAddress(varType.Int, true);
+
+        if (!checkVar(addresses[0], addresses[1], varType.Int)) {
             ErrorHandler.printError("In sub two operands must be integer");
         }
-        memory.add3AddressCode(Operation.SUB, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.SUB, addresses[0], addresses[1], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void mult() {
-        Address temp = new Address(memory.getTemp(), varType.Int);
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != varType.Int || s2.getVarType() != varType.Int) {
+        Address[] addresses = fetchAddress(varType.Int, true);
+
+        if (!checkVar(addresses[0], addresses[1], varType.Int)) {
             ErrorHandler.printError("In mult two operands must be integer");
         }
-        memory.add3AddressCode(Operation.MULT, s1, s2, temp);
+        memory.add3AddressCode(Operation.MULT, addresses[0], addresses[1], addresses[2]);
 //        memory.saveMemory();
-        ss.push(temp);
+        ss.push(addresses[2]);
     }
 
     public void label() {
@@ -366,51 +378,43 @@ public class CodeGenerator {
     }
 
     public void equal() {
-        Address temp = new Address(memory.getTempIndex(), varType.Bool);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != s2.getVarType()) {
+        Address[] addresses = fetchAddress(varType.Bool, true);
+
+        if (!checkVar(addresses[0], addresses[1], null)) {
             ErrorHandler.printError("The type of operands in equal operator is different");
         }
-        memory.add3AddressCode(Operation.EQ, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.EQ, addresses[0], addresses[1], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void less_than() {
-        Address temp = new Address(memory.getTempIndex(), varType.Bool);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != varType.Int || s2.getVarType() != varType.Int) {
+        Address[] addresses = fetchAddress(varType.Bool, true);
+
+        if (!checkVar(addresses[1], addresses[0], varType.Int)) {
             ErrorHandler.printError("The type of operands in less than operator is different");
         }
-        memory.add3AddressCode(Operation.LT, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.LT, addresses[1], addresses[0], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void and() {
-        Address temp = new Address(memory.getTempIndex(), varType.Bool);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != varType.Bool || s2.getVarType() != varType.Bool) {
+        Address[] addresses = fetchAddress(varType.Bool, true);
+
+        if (!checkVar(addresses[0], addresses[1], varType.Bool)) {
             ErrorHandler.printError("In and operator the operands must be boolean");
         }
-        memory.add3AddressCode(Operation.AND, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.AND, addresses[0], addresses[1], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void not() {
-        Address temp = new Address(memory.getTempIndex(), varType.Bool);
-        memory.increaseTempAddress();
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.getVarType() != varType.Bool) {
+        Address[] addresses = fetchAddress(varType.Bool, true);
+
+        if (!checkVar(addresses[0], null, varType.Bool)) {
             ErrorHandler.printError("In not operator the operand must be boolean");
         }
-        memory.add3AddressCode(Operation.NOT, s1, s2, temp);
-        ss.push(temp);
+        memory.add3AddressCode(Operation.NOT, addresses[0], addresses[1], addresses[2]);
+        ss.push(addresses[2]);
     }
 
     public void defClass() {
