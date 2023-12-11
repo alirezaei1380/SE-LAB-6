@@ -181,7 +181,7 @@ public class SymbolTable {
             index = 0;
         }
 
-        private Symbol getNextParameter() {
+        protected Symbol getNextParameter() {
             return parameters.get(orderdParameters.get(index++));
         }
     }

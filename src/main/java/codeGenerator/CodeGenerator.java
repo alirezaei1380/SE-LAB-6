@@ -4,7 +4,7 @@ import Log.Log;
 import errorHandler.ErrorHandler;
 import scanner.token.Token;
 import semantic.symbol.Symbol;
-import semantic.symbol.SymbolTable;
+import semantic.symbol.SymbolTableFacade;
 import semantic.symbol.SymbolType;
 
 import java.util.Stack;
@@ -17,10 +17,10 @@ public class CodeGenerator {
     private Stack<Address> ss = new Stack<Address>();
     private Stack<String> symbolStack = new Stack<>();
     private Stack<String> callStack = new Stack<>();
-    private SymbolTable symbolTable;
+    private SymbolTableFacade symbolTable;
 
     public CodeGenerator() {
-        symbolTable = new SymbolTable(memory);
+        symbolTable = new SymbolTableFacade(memory);
         //TODO
     }
 
@@ -29,7 +29,7 @@ public class CodeGenerator {
         memory.increaseTempAddress();
         Address s2 = ss.pop();
         Address s1 = ss.pop();
-        Address[] addresses = new Address[]{s1, s2, null};
+        Address[] addresses = new Address[]{s2, s1, null};
         if(returnTemp)
             addresses[2] = temp;
         return addresses;
@@ -390,10 +390,10 @@ public class CodeGenerator {
     public void less_than() {
         Address[] addresses = fetchAddress(varType.Bool, true);
 
-        if (!checkVar(addresses[0], addresses[1], varType.Int)) {
+        if (!checkVar(addresses[1], addresses[0], varType.Int)) {
             ErrorHandler.printError("The type of operands in less than operator is different");
         }
-        memory.add3AddressCode(Operation.LT, addresses[0], addresses[1], addresses[2]);
+        memory.add3AddressCode(Operation.LT, addresses[1], addresses[0], addresses[2]);
         ss.push(addresses[2]);
     }
 
