@@ -5,9 +5,9 @@ package codeGenerator;
  */
 
 public class Address {
-    public int num;
-    public TypeAddress Type;
-    public varType varType;
+    private int num;
+    private TypeAddress Type;
+    private varType varType;
 
     public Address(int num, varType varType, TypeAddress Type) {
         this.num = num;
@@ -19,6 +19,14 @@ public class Address {
         this.num = num;
         this.Type = TypeAddress.Direct;
         this.varType = varType;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public varType getVarType() {
+        return varType;
     }
 
     public String toString() {
