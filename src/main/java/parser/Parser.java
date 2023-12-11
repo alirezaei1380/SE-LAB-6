@@ -9,6 +9,7 @@ import java.util.Stack;
 import Log.Log;
 import codeGenerator.CodeGenerator;
 import errorHandler.ErrorHandler;
+import parser.actionHandler.*;
 import scanner.lexicalAnalyzer;
 import scanner.token.Token;
 
@@ -18,6 +19,41 @@ public class Parser {
     private ParseTable parseTable;
     private lexicalAnalyzer lexicalAnalyzer;
     private CodeGenerator cg;
+    private Boolean finish = false;
+
+    private Token lookAhead;
+
+    public void setFinish(Boolean finish) {
+        this.finish = finish;
+    }
+
+    public void setLookAhead(Token lookAhead) {
+        this.lookAhead = lookAhead;
+    }
+
+    public ArrayList<Rule> getRules() {
+        return rules;
+    }
+
+    public ParseTable getParseTable() {
+        return parseTable;
+    }
+
+    public Stack<Integer> getParsStack() {
+        return parsStack;
+    }
+
+    public CodeGenerator getCg() {
+        return cg;
+    }
+
+    public Token getLookAhead() {
+        return lookAhead;
+    }
+
+    public scanner.lexicalAnalyzer getLexicalAnalyzer() {
+        return lexicalAnalyzer;
+    }
 
     public Parser() {
         parsStack = new Stack<Integer>();
@@ -40,9 +76,9 @@ public class Parser {
 
     public void startParse(java.util.Scanner sc) {
         lexicalAnalyzer = new lexicalAnalyzer(sc);
-        Token lookAhead = lexicalAnalyzer.getNextToken();
-        boolean finish = false;
+        lookAhead = lexicalAnalyzer.getNextToken();
         Action currentAction;
+        ActionHandler actHandler;
         while (!finish) {
             try {
                 Log.print(/*"lookahead : "+*/ lookAhead.toString() + "\t" + parsStack.peek());
@@ -50,34 +86,14 @@ public class Parser {
                 currentAction = parseTable.getActionTable(parsStack.peek(), lookAhead);
                 Log.print(currentAction.toString());
                 //Log.print("");
+                if(currentAction.action == act.shift)
+                    actHandler = new ActionShift(this);
+                else if(currentAction.action == act.reduce)
+                    actHandler = new ActionReduce(this);
+                else
+                    actHandler = new ActionAccept(this);
 
-                switch (currentAction.action) {
-                    case shift:
-                        parsStack.push(currentAction.number);
-                        lookAhead = lexicalAnalyzer.getNextToken();
-
-                        break;
-                    case reduce:
-                        Rule rule = rules.get(currentAction.number);
-                        for (int i = 0; i < rule.RHS.size(); i++) {
-                            parsStack.pop();
-                        }
-
-                        Log.print(/*"state : " +*/ parsStack.peek() + "\t" + rule.LHS);
-//                        Log.print("LHS : "+rule.LHS);
-                        parsStack.push(parseTable.getGotoTable(parsStack.peek(), rule.LHS));
-                        Log.print(/*"new State : " + */parsStack.peek() + "");
-//                        Log.print("");
-                        try {
-                            cg.semanticFunction(rule.semanticAction, lookAhead);
-                        } catch (Exception e) {
-                            Log.print("Code Genetator Error");
-                        }
-                        break;
-                    case accept:
-                        finish = true;
-                        break;
-                }
+                actHandler.execute(currentAction);
                 Log.print("");
             } catch (Exception ignored) {
                 ignored.printStackTrace();
