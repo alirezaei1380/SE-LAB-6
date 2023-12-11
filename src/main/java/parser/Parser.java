@@ -43,7 +43,7 @@ public class Parser {
         return parsStack;
     }
 
-    public CodeGenerator getCg() {
+    public CodeGeneratorFacade getCg() {
         return cg;
     }
 
@@ -54,7 +54,6 @@ public class Parser {
     public scanner.lexicalAnalyzer getLexicalAnalyzer() {
         return lexicalAnalyzer;
     }
-    private CodeGeneratorFacade cg;
 
     public Parser() {
         parsStack = new Stack<Integer>();

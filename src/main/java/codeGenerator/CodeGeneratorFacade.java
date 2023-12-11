@@ -1,3 +1,7 @@
+package codeGenerator;
+
+import scanner.token.Token;
+
 public class CodeGeneratorFacade {
     private CodeGenerator codeGenerator;
 

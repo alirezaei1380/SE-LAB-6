@@ -25,7 +25,8 @@ public class CodeGenerator {
     }
 
     private Address[] fetchAddress(varType var, Boolean returnTemp){
-        Address temp = new Address(memory.getTemp(), var);
+        Address temp = new Address(memory.getTempIndex(), var);
+        memory.increaseTempAddress();
         Address s2 = ss.pop();
         Address s1 = ss.pop();
         Address[] addresses = new Address[]{s1, s2, null};
@@ -36,10 +37,10 @@ public class CodeGenerator {
 
     private Boolean checkVar(Address s1, Address s2, varType var){
         if(s2 == null)
-            return s1.varType == var;
+            return s1.getVarType() == var;
         if(var == null)
-            return s1.varType == s2.varType;
-        return s1.varType == var || s2.varType == var;
+            return s1.getVarType() == s2.getVarType();
+        return s1.getVarType() == var || s2.getVarType() == var;
     }
 
     public void printMemory() {
@@ -304,17 +305,16 @@ public class CodeGenerator {
     }
 
     public void assign() {
-        Address s1 = ss.pop();
-        Address s2 = ss.pop();
+        Address[] addresses = fetchAddress(null, false);
 //        try {
-        if (s1.getVarType() != s2.getVarType()) {
+        if (!checkVar(addresses[0], addresses[1], null)) {
             ErrorHandler.printError("The type of operands in assign is different ");
         }
 //        }catch (NullPointerException d)
 //        {
 //            d.printStackTrace();
 //        }
-        memory.add3AddressCode(Operation.ASSIGN, s1, s2, null);
+        memory.add3AddressCode(Operation.ASSIGN, addresses[0], addresses[1], null);
     }
 
     public void add() {
