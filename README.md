@@ -122,7 +122,28 @@ Technical Debt: Describes what results when we develop code with lack of resourc
 ### C
 Bad Smell: Any characteristic in the source code of a program that possibly indicates a deeper problem.
 
-### 3
+## 2
+
+### Bloaters
+
+These smells usually occur when we have some classes or data that are very hard to work with because of different issues like long functions, god classes(enormous class), ... . Usually these types of issues are being generated when we don't pay attention to periodic refactoring on codes or not handling changes in efficient way, this approach ends in logic accumulation and complexity. So later we will not be able to use the implemented codes in efficient and simple way. Also we need to pay attention on release and reuse granulation, which means we need to consider what we are implementing and how we are going to use later.  
+
+### Object-Orientation Abusers
+
+These smells usually can be sniffed from the code when we are not meeting OOP rules properly. Like temporary fields, imagine we are using some temp fields inside the code which are only accepting values under some specific circumstances. So when we try to use them out of their scope we may face null values. Or on the other hand we might use switch-cases as states using patterns in an improper way. Or we might have two separate classes which are doing some identical stuff but they are separate in their definition.
+
+### Change Preventers
+
+These kinds of smells generate when we need to change many parts of the code after changing a specific part. Like shotgun surgery, it happens when we change a single part of a code, we are persuaded to change several places in different classes to keep the code consistent. Or we have Divergent Change which means when we have to make a single change in one class, we are persuaded to do some extra stuff like defining several methods inside that class.
+
+### Dispensables
+
+Sometimes we follow some practices which end in unclean codes and we program in a way that we have some useless codes which can be refactored or maybe removed totally. Like putting comments, which shouldn't explain `How` code is implemented and code should be a self explainer. Or we might have some duplications that are causing the code to be hard to read. Or sometimes we have some classes which can be merged into another class because they follow the same logic but making them separate classes created a lazy and useless class.
+
+### Couplers
+
+When we realise there are some classes in our code that are places between two other classes and they are used a lot without any effect on the streamed data, we should suspect there is an coupler smell exists in our code. One of the most famous types of this issue is Message Chaining. In this issue we have several classes which act like a chain on a sequential logic. But the class in the middle passes the whole object of the first class to the third class instead of returning what first class needs. So, it is not needed and just causes complexity in the code.
+## 3
 ### A
 Dispensables
 ### B
